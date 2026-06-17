@@ -1,10 +1,4 @@
 from fhir.resources.allergyintolerance import AllergyIntolerance
-from fhir.resources.allergyintolerancereaction import AllergyIntoleranceReaction
-from fhir.resources.codeableconcept import CodeableConcept
-from fhir.resources.coding import Coding
-from fhir.resources.reference import Reference
-from fhir.resources.annotation import Annotation
-from fhir.resources.fhirtypes import DateTime
 
 
 def create_allergy_intolerance_resource(
@@ -22,14 +16,14 @@ def create_allergy_intolerance_resource(
     note=None,
 ):
     """
-    Crea un recurso FHIR AllergyIntolerance.
+    Crea un recurso FHIR AllergyIntolerance (R4 - fhir.resources 6.x).
 
     Parámetros
     ----------
     patient_id : str
         ID lógico del paciente en el servidor HAPI FHIR.
     substance_code : str
-        Código SNOMED CT (u otro sistema) de la sustancia.
+        Código SNOMED CT de la sustancia causante.
     substance_display : str
         Nombre legible de la sustancia.
     clinical_status : str
@@ -52,84 +46,68 @@ def create_allergy_intolerance_resource(
         Nota adicional en texto libre.
     """
 
-    allergy = AllergyIntolerance()
+    data = {
+        "clinicalStatus": {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                    "code": clinical_status,
+                    "display": clinical_status.capitalize(),
+                }
+            ]
+        },
+        "verificationStatus": {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+                    "code": verification_status,
+                    "display": verification_status.capitalize(),
+                }
+            ]
+        },
+        "type": allergy_type,
+        "category": [category],
+        "criticality": criticality,
+        "patient": {"reference": f"Patient/{patient_id}"},
+    }
 
-    # --- clinicalStatus (requerido) ---
-    clinical_status_cc = CodeableConcept()
-    clinical_status_coding = Coding()
-    clinical_status_coding.system = (
-        "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
-    )
-    clinical_status_coding.code = clinical_status
-    clinical_status_coding.display = clinical_status.capitalize()
-    clinical_status_cc.coding = [clinical_status_coding]
-    allergy.clinicalStatus = clinical_status_cc
-
-    # --- verificationStatus (requerido) ---
-    verification_status_cc = CodeableConcept()
-    verification_status_coding = Coding()
-    verification_status_coding.system = (
-        "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification"
-    )
-    verification_status_coding.code = verification_status
-    verification_status_coding.display = verification_status.capitalize()
-    verification_status_cc.coding = [verification_status_coding]
-    allergy.verificationStatus = verification_status_cc
-
-    # --- type (allergy / intolerance) ---
-    allergy.type = allergy_type
-
-    # --- category ---
-    allergy.category = [category]
-
-    # --- criticality ---
-    allergy.criticality = criticality
-
-    # --- code (sustancia) ---
+    # Sustancia
     if substance_code or substance_display:
-        code_cc = CodeableConcept()
+        code_entry = {}
         if substance_code:
-            substance_coding = Coding()
-            substance_coding.system = "http://snomed.info/sct"
-            substance_coding.code = substance_code
-            if substance_display:
-                substance_coding.display = substance_display
-            code_cc.coding = [substance_coding]
+            code_entry["coding"] = [
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": substance_code,
+                    "display": substance_display or "",
+                }
+            ]
         if substance_display:
-            code_cc.text = substance_display
-        allergy.code = code_cc
+            code_entry["text"] = substance_display
+        data["code"] = code_entry
 
-    # --- patient (requerido) ---
-    patient_ref = Reference()
-    patient_ref.reference = f"Patient/{patient_id}"
-    allergy.patient = patient_ref
-
-    # --- reaction ---
+    # Reacción — en R4, manifestation es CodeableConcept directo
     if reaction_manifestation_code or reaction_manifestation_display:
-        reaction = AllergyIntoleranceReaction()
-
-        manifestation_cc = CodeableConcept()
+        manifestation = {}
         if reaction_manifestation_code:
-            manifestation_coding = Coding()
-            manifestation_coding.system = "http://snomed.info/sct"
-            manifestation_coding.code = reaction_manifestation_code
-            if reaction_manifestation_display:
-                manifestation_coding.display = reaction_manifestation_display
-            manifestation_cc.coding = [manifestation_coding]
+            manifestation["coding"] = [
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": reaction_manifestation_code,
+                    "display": reaction_manifestation_display or "",
+                }
+            ]
         if reaction_manifestation_display:
-            manifestation_cc.text = reaction_manifestation_display
+            manifestation["text"] = reaction_manifestation_display
 
-        reaction.manifestation = [manifestation_cc]
-
+        reaction = {"manifestation": [manifestation]}
         if reaction_severity:
-            reaction.severity = reaction_severity
+            reaction["severity"] = reaction_severity
 
-        allergy.reaction = [reaction]
+        data["reaction"] = [reaction]
 
-    # --- note ---
+    # Nota
     if note:
-        annotation = Annotation()
-        annotation.text = note
-        allergy.note = [annotation]
+        data["note"] = [{"text": note}]
 
-    return allergy
+    return AllergyIntolerance(**data)

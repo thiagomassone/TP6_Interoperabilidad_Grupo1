@@ -22,10 +22,14 @@ if __name__ == "__main__":
 
     patient_id = send_resource_to_hapi_fhir(patient, "Patient")
 
-    if patient_id:
-        print(f"\nPaciente creado con ID: {patient_id}")
-        print("\nLeyendo recurso creado:")
-        get_resource_from_hapi_fhir(patient_id, "Patient")
+    # Si el paciente ya existe en el servidor, usamos el ID conocido
+    if not patient_id:
+        patient_id = "137001175"
+        print(f"Usando paciente existente con ID: {patient_id}")
+
+    print(f"\nPaciente ID: {patient_id}")
+    print("\nLeyendo recurso creado:")
+    get_resource_from_hapi_fhir(patient_id, "Patient")
 
     # ------------------------------------------------------------------ #
     #  ACTIVIDAD 3b – Buscar paciente por documento                       #
@@ -43,27 +47,24 @@ if __name__ == "__main__":
     print("ACTIVIDAD 3c – Crear recurso AllergyIntolerance")
     print("=" * 60)
 
-    if patient_id:
-        allergy = create_allergy_intolerance_resource(
-            patient_id=patient_id,
-            substance_code="372687004",          # Amoxicillin (SNOMED CT)
-            substance_display="Amoxicilina",
-            clinical_status="active",
-            verification_status="confirmed",
-            allergy_type="allergy",
-            category="medication",
-            criticality="high",
-            reaction_manifestation_code="271807003",   # Eruption of skin (SNOMED CT)
-            reaction_manifestation_display="Erupción cutánea",
-            reaction_severity="moderate",
-            note="Paciente refiere reacción alérgica tras primera dosis de amoxicilina en 2018.",
-        )
+    allergy = create_allergy_intolerance_resource(
+        patient_id=patient_id,
+        substance_code="372687004",
+        substance_display="Amoxicilina",
+        clinical_status="active",
+        verification_status="confirmed",
+        allergy_type="allergy",
+        category="medication",
+        criticality="high",
+        reaction_manifestation_code="271807003",
+        reaction_manifestation_display="Erupción cutánea",
+        reaction_severity="moderate",
+        note="Paciente refiere reacción alérgica tras primera dosis de amoxicilina en 2018.",
+    )
 
-        allergy_id = send_resource_to_hapi_fhir(allergy, "AllergyIntolerance")
+    allergy_id = send_resource_to_hapi_fhir(allergy, "AllergyIntolerance")
 
-        if allergy_id:
-            print(f"\nAllergyIntolerance creada con ID: {allergy_id}")
-            print("\nLeyendo recurso creado:")
-            get_resource_from_hapi_fhir(allergy_id, "AllergyIntolerance")
-    else:
-        print("No se pudo crear el AllergyIntolerance porque falta el ID del paciente.")
+    if allergy_id:
+        print(f"\nAllergyIntolerance creada con ID: {allergy_id}")
+        print("\nLeyendo recurso creado:")
+        get_resource_from_hapi_fhir(allergy_id, "AllergyIntolerance")
