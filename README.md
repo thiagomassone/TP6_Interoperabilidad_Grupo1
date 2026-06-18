@@ -17,6 +17,15 @@ Implementación del recurso **AllergyIntolerance** sobre un servidor HAPI FHIR p
 
 ---
 
+## Clonar el repositorio
+
+```bash
+git clone https://github.com/thiagomassone/TP6_Interoperabilidad_Grupo1.git
+cd TP6_Interoperabilidad_Grupo1
+```
+
+---
+
 ## Requisitos
 
 - Python 3.11+
