@@ -21,7 +21,7 @@ def send_resource_to_hapi_fhir(resource, resource_type):
         return None
 
 
-# Leer un recurso por ID
+# Buscar el recurso por ID 
 def get_resource_from_hapi_fhir(resource_id, resource_type):
     url = f"{HAPI_BASE_URL}/{resource_type}/{resource_id}"
     response = requests.get(url, headers=HEADERS_GET)
@@ -38,10 +38,7 @@ def get_resource_from_hapi_fhir(resource_id, resource_type):
 
 # Buscar pacientes por número de documento (DNI)
 def search_patient_by_dni(dni):
-    """
-    Busca pacientes cuyo identifier coincida con el DNI proporcionado.
-    Utiliza el sistema RENAPER como identificador oficial argentino.
-    """
+
     url = f"{HAPI_BASE_URL}/Patient"
     params = {
         "identifier": f"http://www.renaper.gob.ar/dni|{dni}"

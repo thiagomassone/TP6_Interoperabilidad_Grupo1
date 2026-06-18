@@ -11,7 +11,7 @@ def create_patient_resource(family_name=None, given_name=None, birth_date=None, 
     # Agregar el DNI como identifier si está disponible
     if dni:
         identifier = Identifier()
-        identifier.system = "http://www.renaper.gob.ar/dni"
+        identifier.system = "http://www.renaper.gob.ar/dni" #debe estar para generar el recurso correctamente
         identifier.value = str(dni)
         patient.identifier = [identifier]
 

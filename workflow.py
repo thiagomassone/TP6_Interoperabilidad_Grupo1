@@ -4,13 +4,13 @@ from allergy_intolerance import create_allergy_intolerance_resource
 
 if __name__ == "__main__":
 
-    # ------------------------------------------------------------------ #
-    #  ACTIVIDAD 3a – Crear paciente con DNI e identifier, luego leerlo   #
-    # ------------------------------------------------------------------ #
+    #  ACTIVIDAD 3a – Crear paciente con DNI e identifier, luego leerlo
+
     print("=" * 60)
     print("ACTIVIDAD 3a – Crear y leer paciente con DNI")
     print("=" * 60)
 
+#toda esta parte quedo legacy de las primeras pruebas y ya no se utiliza, pero la dejo comentada por si sirve de referencia
     patient = create_patient_resource(
         family_name="García",
         given_name="Lucía",
@@ -24,8 +24,10 @@ if __name__ == "__main__":
 
     # Si el paciente ya existe en el servidor, usamos el ID conocido
     if not patient_id:
-        patient_id = "137001175"
-        print(f"Usando paciente existente con ID: {patient_id}")
+        print("Paciente ya existe, buscando por DNI...")
+        bundle = search_patient_by_dni("38123456")
+        patient_id = bundle["entry"][0]["resource"]["id"]
+        print(f"Paciente encontrado con ID: {patient_id}")
 
     print(f"\nPaciente ID: {patient_id}")
     print("\nLeyendo recurso creado:")
